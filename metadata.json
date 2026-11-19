@@ -1,0 +1,6 @@
+{
+  "name": "Java Study Companion",
+  "description": "An interactive Java study companion for Weeks 1–12: explanations, verified and runnable code, tracers, memory diagrams, playgrounds and quizzes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
