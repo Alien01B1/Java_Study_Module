@@ -446,6 +446,20 @@ pre.console { margin: 0; }
   font-feature-settings: "liga" 0, "calt" 0, "dlig" 0;
 }
 
+
+/* Cheat sheet week badges */
+.cheat-jump { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 6px; }
+.cheat-jump-label { font-weight: 800; margin-right: 4px; }
+.cheat .card { scroll-margin-top: 90px; }
+.cheat-week { display: inline-block; justify-self: start; align-self: start; width: max-content; max-width: 100%; font-size: 12px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: var(--ink); background: rgba(255,255,255,.7); padding: 3px 10px; border-radius: 999px; margin-bottom: 6px; box-shadow: var(--shadow-small); }
+
+/* Keep scrolling inside the sidebar: do not pass it on to the page */
+.sidebar { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+@media (max-width: 980px) {
+  .sidebar { overflow-y: auto; }
+  body.nav-open { overflow: hidden; }
+  body.nav-open .overlay { overscroll-behavior: contain; touch-action: none; }
+}
 </style>
 </head>
 <body>
@@ -3750,14 +3764,37 @@ pre.console { margin: 0; }
     const head = make('header', 'clay page-head butter');
     head.innerHTML = '<h1>' + esc(cheat.title) + '</h1><p class="lede">' + md(cheat.intro) + '</p>';
     page.appendChild(head);
+    const CHEAT_WEEKS = {
+      'Program skeleton': [2], 'Primitive types': [2], 'Operators': [2], 'Strings': [2], 'Arrays': [2], 'Control flow': [2],
+      'Classes & objects': [2, 3], 'Inheritance & interfaces': [3, 4], 'equals, hashCode': [3], 'Visibility & modifiers': [3, 7],
+      'Generics & wildcards': [5], 'Collections': [6], 'Exceptions': [7], 'Lambdas': [8], 'Streams': [8], 'Copying & var': [8],
+      'Optional & collectors': [9], 'I/O & serialization': [9], 'Threads & synchronization': [10, 11], 'Swing events': [12],
+    };
+    const weeksOf = (t) => { for (const k in CHEAT_WEEKS) if (t.indexOf(k) >= 0) return CHEAT_WEEKS[k]; return null; };
+    const firstCard = {};
+    const jump = make('div', 'cheat-jump');
+    jump.appendChild(make('span', 'cheat-jump-label', 'Jump to week:'));
+    page.appendChild(jump);
     const grid = make('div', 'cheat');
     cheat.cards.forEach((cd) => {
       const c = make('section', 'clay card' + (cd.color ? ' ' + cd.color : ''));
-      c.appendChild(make('h2', '', md(cd.title)));
+      const wk = weeksOf(cd.title);
+      const h2 = make('h2', '', md(cd.title));
+      const badge = make('span', 'cheat-week', wk ? (wk.length > 1 ? 'Weeks ' + wk[0] + '–' + wk[wk.length - 1] : 'Week ' + wk[0]) : 'All weeks');
+      c.appendChild(badge);
+      c.appendChild(h2);
+      (wk || []).forEach((w) => { if (!firstCard[w]) firstCard[w] = c; });
       cd.blocks.forEach((b) => c.appendChild(renderBlock(b)));
       grid.appendChild(c);
     });
     page.appendChild(grid);
+    Object.keys(firstCard).map(Number).sort((a, b) => a - b).forEach((w) => {
+      const b = btn('Week ' + w, 'small' + (w >= 9 ? ' primary' : ''), () => {
+        const y = firstCard[w].getBoundingClientRect().top + window.scrollY - 90;
+        try { window.scrollTo({ top: y, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, y); }
+      });
+      jump.appendChild(b);
+    });
     page.appendChild(pager(r));
     return page;
   }
@@ -13184,7 +13221,7 @@ pre.console { margin: 0; }
 
   Core.cheatsheet({
     title: 'Java cheat sheet',
-    intro: 'Syntax, keywords, common methods and patterns from Weeks 1–8 on one page. Every snippet here compiles, and every output shown was produced by running it. Snippets marked "Inside main" assume {{import java.util.*;}}, {{import java.util.function.*;}} and {{import java.util.stream.*;}} at the top of the file.',
+    intro: 'Syntax, keywords, common methods and patterns from all 12 weeks on one page. Every snippet here compiles, and every output shown was produced by running it. Snippets marked "Inside main" assume {{import java.util.*;}}, {{import java.util.function.*;}} and {{import java.util.stream.*;}} at the top of the file (plus {{import java.io.*;}} for the I/O card).',
     cards: [
       {
         title: '☕ Program skeleton', color: 'lav',
